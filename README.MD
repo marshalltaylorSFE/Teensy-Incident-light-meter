@@ -7,10 +7,11 @@ Teensy Incident Light Meter
 
 Requires the following libraries:
 
-* Teensyduino
-* uCModules library
-* TeensyView library
-* TSL2561 library
+* [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html)
+  * Uses included encoder library
+* [uCModules library](https://github.com/marshalltaylorSFE/uCModules)
+* [TeensyView library](https://github.com/sparkfun/SparkFun_TeensyView_Arduino_Library)
+* [TSL2561 library](https://github.com/sparkfun/SparkFun_TSL2561_Arduino_Library)
 
 ### Hardware
 
@@ -30,6 +31,8 @@ Uses the following:
 
 <img src="https://raw.githubusercontent.com/marshalltaylorSFE/Teensy-Incident-light-meter/master/Schematic.jpg" alt="Schematic" width="40%" height="40%">
 
+*Schematic diagram.  Click to enlarge.*
+
 ### Mechanical
 
 Uses the following:
@@ -44,3 +47,5 @@ The 3D model is a bezel for mounting a ping pong ball to a panel.  The model als
 Case is cut ad-hoc.
 
 <img src="https://raw.githubusercontent.com/marshalltaylorSFE/Teensy-Incident-light-meter/master/innards.jpg" alt="Innards" width="40%" height="40%">
+
+*An assembly*

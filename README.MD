@@ -1,6 +1,8 @@
 Teensy Incident Light Meter
 --------
 
+<img src="https://raw.githubusercontent.com/marshalltaylorSFE/Teensy-Incident-light-meter/master/MainObject.jpg" alt="alt text" width="25%" height="25%">
+
 ### Requirements
 
 * Teensyduino

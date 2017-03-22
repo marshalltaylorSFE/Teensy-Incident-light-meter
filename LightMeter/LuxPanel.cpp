@@ -61,7 +61,8 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 	
 	bool drawDisplay = false;
 	unsigned int data0, data1;
-	
+	drawDisplay =  oled.drawBatteryWidget();
+
 	//***** PROCESS THE LOGIC *****//
 	//Now do the states.
 	PState_t nextState = state;
@@ -294,6 +295,9 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		oled.setCursor(64,20);
 		oled.print(lipo.current(AVG));
 		oled.print("mA    ");
+		oled.setCursor(0,20);
+		oled.print((float)lipo.soc(), 0);
+		oled.print("%");
 		oled.setCursor(64,11);
 		oled.print((float)lipo.voltage()/1000, 2);
 		if( encButton.serviceRisingEdge() )
@@ -314,6 +318,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 			oled.setFontType(0);
 			oled.clear(PAGE);
 			oled.display();
+			nextState = pSystemInit;
 			
 		}
 		drawDisplay = true;
@@ -323,8 +328,54 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		}
 		if( upButton.serviceRisingEdge() )
 		{
+			nextState = PDisplayLuxValueInit;
+		}
+		break;
+	case PDisplayLuxValueInit:
+		drawDisplay = true;
+		oled.clear(PAGE);
+		//menu part
+		oled.drawMenu("Lux", false, false );
+		nextState = PDisplayLuxValue;
+		break;
+	case PDisplayLuxValue:
+		if( downButton.serviceRisingEdge() )
+		{
+			nextState = pSystemInit;
+		}
+		if( upButton.serviceRisingEdge() )
+		{
 			nextState = pMaryInit;
 		}
+		if (light.getData(data0,data1))
+		{
+			drawDisplay = true;
+			double tempLux;
+			good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
+			updateLux( tempLux );
+			oled.setCursor(0,11);
+			oled.print(data0);
+			oled.print("   ");
+			oled.setCursor(64,11);
+			oled.print(data1);
+			oled.print("   ");
+
+			// Print out the results:
+			oled.setCursor(0,20);
+			oled.print("lux:");
+			oled.print(lux);
+			oled.print("   ");
+			oled.setCursor(116,20);
+			if (good) oled.print("  ");	else oled.drawNo(120,20);
+		}
+		else
+		{
+			drawDisplay = true;
+			oled.setCursor(0,11);
+			oled.print("ERROR");
+		}
+
+
 		break;
 	case pMaryInit:
 		dataWheel.clearDiff();
@@ -351,58 +402,12 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		//Draw new value
 		if( downButton.serviceRisingEdge() )
 		{
-			nextState = pSystemInit;
-		}
-		if( upButton.serviceRisingEdge() )
-		{
 			nextState = PDisplayLuxValueInit;
-		}
-		break;
-	case PDisplayLuxValueInit:
-		drawDisplay = true;
-		oled.clear(PAGE);
-		//menu part
-		oled.drawMenu("Lux", false, false );
-		nextState = PDisplayLuxValue;
-		break;
-	case PDisplayLuxValue:
-		if( downButton.serviceRisingEdge() )
-		{
-			nextState = pMaryInit;
 		}
 		if( upButton.serviceRisingEdge() )
 		{
 			//nextState = ;
 		}
-		if (light.getData(data0,data1))
-		{
-			drawDisplay = true;
-			double tempLux;
-			good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
-			updateLux( tempLux );
-			oled.setCursor(0,11);
-			oled.print(data0);
-			oled.print("   ");
-			oled.setCursor(64,11);
-			oled.print(data1);
-			oled.print("   ");
-
-			// Print out the results:
-			oled.setCursor(0,20);
-			oled.print(" lux: ");
-			oled.print(lux);
-			oled.print("   ");
-			oled.setCursor(116,20);
-			if (good) oled.print("  ");	else oled.drawNo(120,20);
-		}
-		else
-		{
-			drawDisplay = true;
-			oled.setCursor(0,11);
-			oled.print("ERROR");
-		}
-
-
 		break;
 	default:
 		nextState = PInit;
@@ -450,6 +455,11 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		break;
 	}
 	triggerState = nextTriggerState;
+}
+
+void LuxPanel::powerDown( void )
+{
+	//
 }
 
 void LuxPanel::updateLux( double inputLux )

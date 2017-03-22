@@ -42,7 +42,7 @@ class LuxPanel : public Panel
 public:
 	LuxPanel( void );
 	void tickStateMachine( int msTicksDelta );
-	
+	void powerDown( void );
 	bool lipoGood;
 	
 private:
@@ -65,6 +65,7 @@ private:
 	uint8_t exposureSetting;
 	uint8_t isoSetting;
 	uint8_t heartCount;
+	
 	
 };
 
@@ -161,14 +162,72 @@ public:
 	{
 		setCursor(10,0);
 		print(name);
+		//Force widget
 		batteryStyle1(116, 0, (float)lipo.soc() / 100);
-		if(lipo.current(AVG) >= 0)
+		if(lipo.current(AVG) >= -1)
 		{
 			drawPlug(106, 0);
+		}
+		else
+		{
+			drawByte(106, 0, 0x00);
+			drawByte(107, 0, 0x00);
+			drawByte(108, 0, 0x00);
+			drawByte(109, 0, 0x00);
+			drawByte(110, 0, 0x00);
+			drawByte(111, 0, 0x00);
+			drawByte(112, 0, 0x00);
+			drawByte(113, 0, 0x00);	
+			drawByte(114, 0, 0x00);			
 		}
 		//if( lArrow ) drawLeftArrow();
 		//if( rArrow ) drawRightArrow();
 		drawSeperator1();
+	};
+	bool drawBatteryWidget( void )
+	{
+		bool returnVar = false;
+		int tempSOC = lipo.soc();
+		int tempChargerState;
+		if(lipo.current(AVG) >= -1)
+		{
+			tempChargerState = 1;
+		}
+		else
+		{
+			tempChargerState = 0;
+		}
+		if( lastSOC != tempSOC )
+		{
+			returnVar = true;
+			lastSOC = tempSOC;
+			//redraw
+			batteryStyle1(116, 0, (float)lipo.soc() / 100);
+		}
+		if(lastChargerState != tempChargerState)
+		{
+			returnVar = true;
+			lastChargerState = tempChargerState;
+			//redraw
+			if(lastChargerState == 1 )
+			{
+				drawPlug(106, 0);
+			}
+			else
+			{
+				drawByte(106, 0, 0x00);
+				drawByte(107, 0, 0x00);
+				drawByte(108, 0, 0x00);
+				drawByte(109, 0, 0x00);
+				drawByte(110, 0, 0x00);
+				drawByte(111, 0, 0x00);
+				drawByte(112, 0, 0x00);
+				drawByte(113, 0, 0x00);
+				drawByte(114, 0, 0x00);
+				
+			}
+		}
+		return returnVar;
 	};
 	void drawMenu(const char *name, uint16_t isoValue, bool lArrow, bool rArrow )
 	{
@@ -348,9 +407,9 @@ public:
 		drawByte(xIn + 9,yIn + 0,0xEE);
 		drawByte(xIn + 10,yIn + 0,0x38);
 		//line(xIn, yIn + 1, xIn + (percent * 10), yIn + 1);
-		line(xIn + 2, yIn + 2, xIn + 2 + (percent * 7), yIn + 2);
-		line(xIn + 2, yIn + 3, xIn + 2 + (percent * 7), yIn + 3);
-		line(xIn + 2, yIn + 4, xIn + 2 + (percent * 7), yIn + 4);
+		line(xIn + 2, yIn + 2, xIn + 2 + (percent * 6), yIn + 2);
+		line(xIn + 2, yIn + 3, xIn + 2 + (percent * 6), yIn + 3);
+		line(xIn + 2, yIn + 4, xIn + 2 + (percent * 6), yIn + 4);
 		//line(xIn, yIn + 5, xIn + (percent * 10), yIn + 5);
 		//rectFill(80 , 25, 84, 30);
 
@@ -413,6 +472,9 @@ public:
 		drawByte(xIn + 5,yIn + 0,0x44);
 		drawByte(xIn + 6,yIn + 0,0x38);
 	};
+private:
+	int16_t lastSOC;
+	int16_t lastChargerState = 0;
 };
 
 #endif
